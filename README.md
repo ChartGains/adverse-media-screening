@@ -1,36 +1,178 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Adverse Media Screening Tool
+
+An automated adverse media screening platform for compliance teams, built with Next.js, Supabase, and AI integrations.
+
+## Features
+
+### Core Screening
+- **Subject Input**: Manual single-entry form with comprehensive fields
+- **Batch Processing**: CSV upload for bulk screening
+- **Search Integration**: Dual provider support (SerpAPI + Google Custom Search)
+- **AI Analysis**: Claude and OpenAI with automatic fallback
+
+### Review System
+- **Review Queue**: Prioritized list of screenings awaiting review
+- **Article Cards**: AI-generated summaries with confidence scores
+- **Review Actions**: Confirm Match, Exclude, Escalate, Clear, Flag
+- **Decision Recording**: Final decisions with audit trail
+
+### Admin Dashboard
+- **Activity Feed**: Real-time monitoring of all user actions
+- **User Management**: Role assignment, activation/deactivation
+- **All Screenings**: Searchable list with filters
+- **Audit Log**: Complete exportable audit trail
+
+### Comprehensive Search Taxonomy
+11 categories of adverse media keywords:
+1. Financial Crimes (fraud, embezzlement, money laundering)
+2. Violent Crimes (murder, assault, kidnapping)
+3. Organized Crime (trafficking, cartels, racketeering)
+4. Terrorism & Security (sanctions, extremism)
+5. Sexual Offenses
+6. Legal/Criminal Proceedings
+7. Regulatory Actions
+8. Civil/Business Issues
+9. Reputational/Ethical
+10. Environmental Crimes
+11. Cyber Crimes
+
+## Tech Stack
+
+- **Frontend**: Next.js 15, React 19, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL + Auth + Realtime)
+- **AI**: Anthropic Claude, OpenAI GPT-4
+- **Search**: SerpAPI, Google Custom Search
+- **Deployment**: Vercel
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
 
+- Node.js 18+
+- Supabase account
+- API keys for:
+  - SerpAPI
+  - Google Custom Search (optional)
+  - Anthropic Claude
+  - OpenAI (optional, for fallback)
+
+### Installation
+
+1. Clone the repository:
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd adverse-media-app
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+2. Copy environment variables:
+```bash
+cp env.example.txt .env.local
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+3. Configure your `.env.local`:
+```env
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+SERPAPI_API_KEY=your_serpapi_key
+GOOGLE_CSE_API_KEY=your_google_cse_key
+GOOGLE_CSE_CX=your_search_engine_id
 
-## Learn More
+ANTHROPIC_API_KEY=your_claude_key
+OPENAI_API_KEY=your_openai_key
+```
 
-To learn more about Next.js, take a look at the following resources:
+4. Set up the database:
+   - Go to your Supabase project
+   - Navigate to SQL Editor
+   - Run `supabase/schema.sql`
+   - Run `supabase/seed-search-terms.sql`
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+5. Start the development server:
+```bash
+npm run dev
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## User Roles
 
-## Deploy on Vercel
+| Role | Permissions |
+|------|-------------|
+| **Analyst** | Submit screenings, review results, make decisions |
+| **Senior Analyst** | All Analyst + handle escalations, override decisions |
+| **Admin** | Full access + user management, system configuration |
+| **Auditor** | Read-only access to all records and audit trails |
+| **API User** | Programmatic access only |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Project Structure
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+src/
+├── app/
+│   ├── (auth)/           # Login pages
+│   ├── (dashboard)/      # Analyst dashboard
+│   ├── (admin)/          # Admin panel
+│   └── api/              # API routes
+├── components/
+│   ├── ui/               # Reusable UI components
+│   ├── layout/           # Sidebar, header
+│   └── review/           # Review-specific components
+├── lib/
+│   ├── supabase/         # Database clients
+│   ├── search/           # Search services
+│   └── ai/               # AI integrations
+└── types/                # TypeScript types
+```
+
+## API Routes
+
+### Authentication
+- `POST /api/auth/login` - User login
+- `POST /api/auth/logout` - User logout
+
+### Screening
+- `POST /api/screening/submit` - Submit new screening
+- `POST /api/screening/batch` - Batch CSV upload
+- `GET /api/screening/[id]` - Get screening details
+- `GET /api/screening/queue` - Get review queue
+
+### Search & Analysis
+- `POST /api/search/execute` - Run search queries
+- `POST /api/analysis/run` - Run AI analysis
+
+### Review
+- `POST /api/review/action` - Submit review action
+- `POST /api/review/decision` - Submit final decision
+
+### Reports
+- `GET /api/reports/individual/[id]` - Generate screening report
+
+### Admin
+- `GET /api/admin/users` - List all users
+- `GET /api/admin/activity` - Activity feed
+- `GET /api/admin/audit-log` - Audit trail
+
+## Database Schema
+
+Key tables:
+- `user_profiles` - User accounts and roles
+- `screening_subjects` - Subjects being screened
+- `search_results` - Raw search results
+- `article_analyses` - AI analysis results
+- `reviews` - Human review actions
+- `screening_decisions` - Final decisions
+- `audit_logs` - Complete audit trail
+- `search_term_categories` - Keyword taxonomy
+- `search_terms` - Individual search terms
+
+## Security Features
+
+- Row Level Security (RLS) on all tables
+- Role-based access control
+- Complete audit logging
+- Session management via Supabase Auth
+- Encrypted data at rest and in transit
+
+## License
+
+Proprietary - All rights reserved.
