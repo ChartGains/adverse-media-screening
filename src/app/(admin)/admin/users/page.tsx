@@ -291,7 +291,7 @@ export default function UsersPage() {
                         <Select
                           value={user.role}
                           onChange={(e) => updateUserRole(user.id, e.target.value as UserRole)}
-                          className="w-36 h-8 text-sm"
+                          className="w-40 h-9 py-1 text-sm"
                         >
                           <option value="analyst">Analyst</option>
                           <option value="senior_analyst">Senior Analyst</option>
@@ -301,26 +301,32 @@ export default function UsersPage() {
                         </Select>
                       </td>
                       <td className="py-3 px-4">
-                        <Select
-                          value={user.manager_id || ''}
-                          onChange={(e) => updateUserManager(user.id, e.target.value || null)}
-                          className="w-40 h-8 text-sm"
-                        >
-                          <option value="">No Manager</option>
-                          {potentialManagers
-                            .filter(m => m.id !== user.id) // Can't be own manager
-                            .map(m => (
-                              <option key={m.id} value={m.id}>
-                                {m.full_name}
-                              </option>
-                            ))
-                          }
-                        </Select>
-                        {user.manager && (
-                          <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
-                            <ChevronRight className="h-3 w-3" />
-                            Reports to: {user.manager.full_name}
-                          </p>
+                        {user.role === 'admin' || user.role === 'auditor' ? (
+                          <span className="text-sm text-slate-400">N/A</span>
+                        ) : (
+                          <>
+                            <Select
+                              value={user.manager_id || ''}
+                              onChange={(e) => updateUserManager(user.id, e.target.value || null)}
+                              className="w-44 h-9 py-1 text-sm"
+                            >
+                              <option value="">No Manager</option>
+                              {potentialManagers
+                                .filter(m => m.id !== user.id) // Can't be own manager
+                                .map(m => (
+                                  <option key={m.id} value={m.id}>
+                                    {m.full_name}
+                                  </option>
+                                ))
+                              }
+                            </Select>
+                            {user.manager && (
+                              <p className="text-xs text-slate-500 mt-1 flex items-center gap-1">
+                                <ChevronRight className="h-3 w-3" />
+                                Reports to: {user.manager.full_name}
+                              </p>
+                            )}
+                          </>
                         )}
                       </td>
                       <td className="py-3 px-4">
@@ -433,7 +439,14 @@ export default function UsersPage() {
                   <Select
                     id="role"
                     value={newUser.role}
-                    onChange={(e) => setNewUser({ ...newUser, role: e.target.value as UserRole })}
+                    onChange={(e) => {
+                      const role = e.target.value as UserRole
+                      setNewUser({
+                        ...newUser,
+                        role,
+                        manager_id: (role === 'admin' || role === 'auditor') ? '' : newUser.manager_id
+                      })
+                    }}
                     required
                   >
                     <option value="analyst">Analyst</option>
@@ -454,22 +467,24 @@ export default function UsersPage() {
                   />
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="manager">Manager (Optional)</Label>
-                  <Select
-                    id="manager"
-                    value={newUser.manager_id}
-                    onChange={(e) => setNewUser({ ...newUser, manager_id: e.target.value })}
-                  >
-                    <option value="">No Manager</option>
-                    {potentialManagers.map(m => (
-                      <option key={m.id} value={m.id}>
-                        {m.full_name} ({m.role})
-                      </option>
-                    ))}
-                  </Select>
-                  <p className="text-xs text-slate-500">Escalations will be sent to this person</p>
-                </div>
+                {newUser.role !== 'admin' && newUser.role !== 'auditor' && (
+                  <div className="space-y-2">
+                    <Label htmlFor="manager">Manager (Optional)</Label>
+                    <Select
+                      id="manager"
+                      value={newUser.manager_id}
+                      onChange={(e) => setNewUser({ ...newUser, manager_id: e.target.value })}
+                    >
+                      <option value="">No Manager</option>
+                      {potentialManagers.map(m => (
+                        <option key={m.id} value={m.id}>
+                          {m.full_name} ({m.role})
+                        </option>
+                      ))}
+                    </Select>
+                    <p className="text-xs text-slate-500">Escalations will be sent to this person</p>
+                  </div>
+                )}
 
                 <div className="flex gap-3 pt-4">
                   <Button

@@ -43,10 +43,10 @@ export async function POST(request: NextRequest) {
       .select('*', { count: 'exact', head: true })
       .eq('subject_id', data.subjectId)
 
-    // Insert screening decision
+    // Upsert screening decision (update if one already exists for this subject)
     const { data: decision, error } = await supabase
       .from('screening_decisions')
-      .insert({
+      .upsert({
         subject_id: data.subjectId,
         decision: data.decision,
         final_risk_level: data.finalRiskLevel,
@@ -54,18 +54,13 @@ export async function POST(request: NextRequest) {
         decided_by: user.id,
         flagged_articles_count: flaggedCount || 0,
         total_articles_reviewed: totalReviewed || 0,
-      } as never)
+      } as never, {
+        onConflict: 'subject_id',
+      })
       .select()
       .single() as { data: { id: string } | null; error: { code?: string } | null }
 
     if (error) {
-      // Check if decision already exists
-      if (error.code === '23505') {
-        return NextResponse.json(
-          { error: 'Decision already exists for this subject' },
-          { status: 409 }
-        )
-      }
       throw error
     }
 

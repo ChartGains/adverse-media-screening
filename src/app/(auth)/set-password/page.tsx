@@ -91,79 +91,89 @@ export default function SetPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
-      <Card className="w-full max-w-md">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4 h-12 w-12 rounded-xl bg-emerald-500 flex items-center justify-center">
-            <Shield className="h-6 w-6 text-white" />
+    <Card className="border-0 shadow-2xl">
+      <CardHeader className="space-y-4 pb-6">
+        <div className="flex items-center justify-center">
+          <div className="h-14 w-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
+            <Shield className="h-8 w-8 text-white" />
           </div>
-          <CardTitle className="text-2xl">Set Your Password</CardTitle>
+        </div>
+        <div className="text-center">
+          <CardTitle className="text-2xl font-bold tracking-tight">Set Your Password</CardTitle>
           {userEmail && (
             <p className="text-sm text-slate-500 mt-2">
               Welcome! Set a password for <strong>{userEmail}</strong>
             </p>
           )}
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            <div className="space-y-2">
-              <Label htmlFor="password">New Password</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                  required
-                  minLength={8}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                </button>
-              </div>
-              <p className="text-xs text-slate-500">Must be at least 8 characters</p>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-5">
+          {error && (
+            <div className="flex items-center gap-2 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              <span>{error}</span>
             </div>
+          )}
 
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+          <div className="space-y-2">
+            <Label htmlFor="password">New Password</Label>
+            <div className="relative">
               <Input
-                id="confirmPassword"
+                id="password"
                 type={showPassword ? 'text' : 'password'}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="Confirm your password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Enter your password"
                 required
+                minLength={8}
               />
-              {password && confirmPassword && password === confirmPassword && (
-                <p className="text-xs text-emerald-600 flex items-center gap-1">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Passwords match
-                </p>
-              )}
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
             </div>
+            <p className="text-xs text-slate-500">Must be at least 8 characters</p>
+          </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              isLoading={isLoading}
-              disabled={!password || !confirmPassword}
-            >
-              Set Password & Continue
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
-    </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
+            <Input
+              id="confirmPassword"
+              type={showPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder="Confirm your password"
+              required
+            />
+            {password && confirmPassword && password === confirmPassword && (
+              <p className="text-xs text-emerald-600 flex items-center gap-1">
+                <CheckCircle2 className="h-3 w-3" />
+                Passwords match
+              </p>
+            )}
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full h-11 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700"
+            isLoading={isLoading}
+            disabled={!password || !confirmPassword}
+          >
+            Set Password & Continue
+          </Button>
+        </form>
+
+        <div className="mt-6 pt-6 border-t border-slate-200">
+          <p className="text-xs text-center text-slate-500">
+            Protected system. Unauthorized access is prohibited.
+            <br />
+            All activity is logged and monitored.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

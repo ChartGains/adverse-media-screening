@@ -10,6 +10,7 @@ CREATE TABLE public.user_profiles (
     full_name TEXT NOT NULL,
     role TEXT NOT NULL CHECK (role IN ('analyst', 'senior_analyst', 'admin', 'api_user', 'auditor')),
     department TEXT,
+    manager_id UUID REFERENCES public.user_profiles(id) ON DELETE SET NULL,
     is_active BOOLEAN DEFAULT true,
     last_active_at TIMESTAMPTZ,
     created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -19,6 +20,7 @@ CREATE TABLE public.user_profiles (
 -- Create index for faster lookups
 CREATE INDEX idx_user_profiles_role ON public.user_profiles(role);
 CREATE INDEX idx_user_profiles_email ON public.user_profiles(email);
+CREATE INDEX idx_user_profiles_manager ON public.user_profiles(manager_id);
 
 -- ============================================
 -- 2. SCREENING SUBJECTS TABLE
@@ -213,7 +215,26 @@ CREATE INDEX idx_batch_uploads_status ON public.batch_uploads(status);
 CREATE INDEX idx_batch_uploads_uploaded_by ON public.batch_uploads(uploaded_by);
 
 -- ============================================
--- 11. ROW LEVEL SECURITY POLICIES
+-- 11. NOTIFICATIONS TABLE
+-- ============================================
+CREATE TABLE public.notifications (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES public.user_profiles(id) ON DELETE CASCADE,
+    type TEXT NOT NULL,
+    title TEXT NOT NULL,
+    message TEXT,
+    link TEXT,
+    metadata JSONB DEFAULT '{}',
+    is_read BOOLEAN DEFAULT false,
+    read_at TIMESTAMPTZ,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE INDEX idx_notifications_user ON public.notifications(user_id);
+CREATE INDEX idx_notifications_unread ON public.notifications(user_id, is_read) WHERE is_read = false;
+
+-- ============================================
+-- 12. ROW LEVEL SECURITY POLICIES
 -- ============================================
 
 -- Enable RLS on all tables
@@ -227,6 +248,7 @@ ALTER TABLE public.reviews ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.screening_decisions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.batch_uploads ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
 
 -- User Profiles Policies
 CREATE POLICY "Users can view own profile" ON public.user_profiles
@@ -336,6 +358,9 @@ CREATE POLICY "Users can view related decisions" ON public.screening_decisions
 CREATE POLICY "Users can insert decisions" ON public.screening_decisions
     FOR INSERT WITH CHECK (decided_by = auth.uid());
 
+CREATE POLICY "Users can update own decisions" ON public.screening_decisions
+    FOR UPDATE USING (decided_by = auth.uid());
+
 -- Audit Logs Policies (Admins and Auditors only)
 CREATE POLICY "Admins and auditors can view audit logs" ON public.audit_logs
     FOR SELECT USING (
@@ -358,8 +383,18 @@ CREATE POLICY "Users can insert batches" ON public.batch_uploads
 CREATE POLICY "Users can update own batches" ON public.batch_uploads
     FOR UPDATE USING (uploaded_by = auth.uid());
 
+-- Notifications Policies
+CREATE POLICY "Users can view own notifications" ON public.notifications
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update own notifications" ON public.notifications
+    FOR UPDATE USING (user_id = auth.uid());
+
+CREATE POLICY "System can insert notifications" ON public.notifications
+    FOR INSERT WITH CHECK (true);
+
 -- ============================================
--- 12. FUNCTIONS & TRIGGERS
+-- 13. FUNCTIONS & TRIGGERS
 -- ============================================
 
 -- Function to update updated_at timestamp

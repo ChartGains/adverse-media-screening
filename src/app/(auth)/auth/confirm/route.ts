@@ -32,5 +32,9 @@ export async function GET(request: Request) {
     console.error('Token verification error:', error)
   }
 
-  return NextResponse.redirect(`${origin}/login?error=invalid_token`)
+  // If we get here, there were no server-readable params (code or token_hash).
+  // Supabase invite links often deliver tokens as URL hash fragments which the
+  // server can't see. Redirect to the client-side callback page which CAN read
+  // hash fragments and complete the auth flow.
+  return NextResponse.redirect(`${origin}/auth/callback`)
 }

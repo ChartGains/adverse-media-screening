@@ -56,7 +56,7 @@ export async function POST(request: NextRequest) {
           full_name,
           role,
         },
-        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3002'}/auth/confirm`,
+        redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3002'}/auth/callback`,
       }
     )
 
