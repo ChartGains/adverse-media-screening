@@ -47,7 +47,7 @@ export default function AdminScreeningsPage() {
       .order('created_at', { ascending: false })
       .limit(100)
 
-    setScreenings((data || []) as ScreeningWithUser[])
+    setScreenings((data || []) as unknown as ScreeningWithUser[])
     setIsLoading(false)
   }
 

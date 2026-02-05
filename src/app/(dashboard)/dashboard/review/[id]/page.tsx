@@ -64,7 +64,7 @@ export default function ReviewDetailPage({
       return
     }
 
-    setData({ screening: screening as ReviewData['screening'] })
+    setData({ screening: screening as unknown as ReviewData['screening'] })
     setIsLoading(false)
   }
 

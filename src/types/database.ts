@@ -34,6 +34,7 @@ export interface Database {
           full_name: string
           role: UserRole
           department: string | null
+          manager_id: string | null
           is_active: boolean
           last_active_at: string | null
           created_at: string
@@ -45,6 +46,7 @@ export interface Database {
           full_name: string
           role?: UserRole
           department?: string | null
+          manager_id?: string | null
           is_active?: boolean
           last_active_at?: string | null
           created_at?: string
@@ -56,11 +58,13 @@ export interface Database {
           full_name?: string
           role?: UserRole
           department?: string | null
+          manager_id?: string | null
           is_active?: boolean
           last_active_at?: string | null
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       screening_subjects: {
         Row: {
@@ -117,6 +121,7 @@ export interface Database {
           created_at?: string
           completed_at?: string | null
         }
+        Relationships: []
       }
       search_term_categories: {
         Row: {
@@ -149,6 +154,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       search_terms: {
         Row: {
@@ -181,6 +187,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       search_results: {
         Row: {
@@ -225,6 +232,7 @@ export interface Database {
           is_duplicate?: boolean
           created_at?: string
         }
+        Relationships: []
       }
       article_analyses: {
         Row: {
@@ -293,6 +301,7 @@ export interface Database {
           processing_time_ms?: number | null
           created_at?: string
         }
+        Relationships: []
       }
       reviews: {
         Row: {
@@ -328,6 +337,7 @@ export interface Database {
           time_spent_seconds?: number | null
           created_at?: string
         }
+        Relationships: []
       }
       screening_decisions: {
         Row: {
@@ -366,6 +376,7 @@ export interface Database {
           total_articles_reviewed?: number
           created_at?: string
         }
+        Relationships: []
       }
       audit_logs: {
         Row: {
@@ -407,6 +418,43 @@ export interface Database {
           user_agent?: string | null
           created_at?: string
         }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          id: string
+          user_id: string
+          type: string
+          title: string
+          message: string | null
+          link: string | null
+          metadata: Json
+          is_read: boolean
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          type: string
+          title: string
+          message?: string | null
+          link?: string | null
+          metadata?: Json
+          is_read?: boolean
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          type?: string
+          title?: string
+          message?: string | null
+          link?: string | null
+          metadata?: Json
+          is_read?: boolean
+          created_at?: string
+        }
+        Relationships: []
       }
       batch_uploads: {
         Row: {
@@ -448,6 +496,7 @@ export interface Database {
           created_at?: string
           completed_at?: string | null
         }
+        Relationships: []
       }
     }
     Views: {
@@ -462,6 +511,7 @@ export interface Database {
           active_users: number
           reviews_last_24h: number
         }
+        Relationships: []
       }
       user_activity_summary: {
         Row: {
@@ -474,6 +524,7 @@ export interface Database {
           total_reviews_completed: number
           total_decisions_made: number
         }
+        Relationships: []
       }
     }
     Functions: {
@@ -487,6 +538,12 @@ export interface Database {
         }
         Returns: string
       }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
     }
   }
 }

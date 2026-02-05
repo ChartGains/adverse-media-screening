@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server'
 import { createAdminClient } from '@/lib/supabase/admin'
 import { NextRequest, NextResponse } from 'next/server'
 import { z } from 'zod'
+import type { MatchStatus } from '@/types/database'
 
 const reviewActionSchema = z.object({
   subjectId: z.string().uuid(),
@@ -56,10 +57,10 @@ export async function POST(request: NextRequest) {
 
     // If article was reviewed, update the analysis match status
     if (data.articleAnalysisId) {
-      const matchStatus = data.action === 'confirm_match' 
-        ? 'matched' 
-        : data.action === 'exclude' 
-        ? 'excluded' 
+      const matchStatus: MatchStatus = data.action === 'confirm_match'
+        ? 'matched'
+        : data.action === 'exclude'
+        ? 'excluded'
         : 'uncertain'
 
       const { error: updateError } = await adminClient

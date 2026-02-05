@@ -23,7 +23,6 @@ import { formatRelativeTime, formatDateTime } from '@/lib/utils'
 import { UserProfile, UserRole } from '@/types/database'
 
 interface UserWithManager extends UserProfile {
-  manager_id?: string | null
   manager?: { full_name: string; email: string } | null
 }
 
@@ -74,7 +73,7 @@ export default function UsersPage() {
         .select('*')
         .order('created_at', { ascending: false })
       
-      data = result.data
+      data = result.data as typeof data
       error = result.error
     }
 
@@ -82,7 +81,7 @@ export default function UsersPage() {
       console.error('Failed to load users:', error)
     }
 
-    setUsers((data as UserWithManager[]) || [])
+    setUsers((data as unknown as UserWithManager[]) || [])
     setIsLoading(false)
   }
 
