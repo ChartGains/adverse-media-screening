@@ -21,17 +21,38 @@ export default function SetPasswordPage() {
   const [userEmail, setUserEmail] = useState<string | null>(null)
 
   useEffect(() => {
-    // Get the current user (they should be logged in via the invite token)
+    // Listen for auth state changes — the session may still be establishing
+    // from the invite token exchange that happened on the callback page.
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        if (session?.user) {
+          setUserEmail(session.user.email || null)
+        }
+      }
+    )
+
+    // Also check immediately in case session is already established
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       if (user) {
         setUserEmail(user.email || null)
       } else {
-        // No user session - redirect to login
-        router.push('/login?error=session_expired')
+        // Wait briefly — session may still be propagating from callback
+        setTimeout(async () => {
+          const { data: { user: retryUser } } = await supabase.auth.getUser()
+          if (retryUser) {
+            setUserEmail(retryUser.email || null)
+          } else {
+            router.push('/login?error=session_expired')
+          }
+        }, 2000)
       }
     }
     getUser()
+
+    return () => {
+      subscription.unsubscribe()
+    }
   }, [supabase, router])
 
   const handleSubmit = async (e: React.FormEvent) => {
