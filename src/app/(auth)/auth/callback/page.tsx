@@ -1,11 +1,11 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { Suspense, useEffect, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { Spinner } from '@/components/ui/spinner'
 
-export default function AuthCallbackPage() {
+function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createClient()
@@ -75,5 +75,20 @@ export default function AuthCallbackPage() {
       <Spinner size="lg" />
       <p className="text-slate-400">Completing sign in...</p>
     </div>
+  )
+}
+
+export default function AuthCallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="text-center space-y-4">
+          <Spinner size="lg" />
+          <p className="text-slate-400">Loading...</p>
+        </div>
+      }
+    >
+      <AuthCallbackContent />
+    </Suspense>
   )
 }
