@@ -27,49 +27,34 @@ export async function updateSession(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: Do not write any logic between createServerClient and
-  // supabase.auth.getUser(). A simple mistake could make it very hard to debug
-  // issues with users being randomly logged out.
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
   // Define public routes that don't require authentication
   const publicRoutes = ['/login', '/set-password', '/auth/callback', '/auth/confirm']
-  const isPublicRoute = publicRoutes.some(route => 
+  const isPublicRoute = publicRoutes.some(route =>
     request.nextUrl.pathname.startsWith(route)
   )
 
+  // Use getSession() in middleware — reads from cookies, no network call.
+  // Token is validated server-side in actual page/API routes via getUser().
+  const {
+    data: { session },
+  } = await supabase.auth.getSession()
+
   // If user is not logged in and trying to access protected route
-  if (!user && !isPublicRoute) {
+  if (!session && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
   // If user is logged in and trying to access login page, redirect to dashboard
-  if (user && request.nextUrl.pathname === '/login') {
+  if (session && request.nextUrl.pathname === '/login') {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
   }
 
-  // Check for admin routes
-  if (user && request.nextUrl.pathname.startsWith('/admin')) {
-    // Fetch user profile to check role
-    const { data: profile } = await supabase
-      .from('user_profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (!profile || !['admin', 'auditor'].includes(profile.role)) {
-      const url = request.nextUrl.clone()
-      url.pathname = '/dashboard'
-      return NextResponse.redirect(url)
-    }
-  }
+  // NOTE: Admin role checks are done in the admin pages themselves,
+  // not in middleware, to avoid slow DB calls on every request.
 
   return supabaseResponse
 }
