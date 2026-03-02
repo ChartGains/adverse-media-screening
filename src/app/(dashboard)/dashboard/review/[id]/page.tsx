@@ -182,13 +182,15 @@ export default function ReviewDetailPage({
                   <p className="text-sm text-slate-500">Full Name</p>
                   <p className="font-medium">{screening.full_name}</p>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-slate-400" />
-                  <div>
-                    <p className="text-sm text-slate-500">Date of Birth</p>
-                    <p className="font-medium">{formatDate(screening.date_of_birth)}</p>
+                {screening.date_of_birth && screening.date_of_birth !== '1970-01-01' && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4 text-slate-400" />
+                    <div>
+                      <p className="text-sm text-slate-500">Date of Birth</p>
+                      <p className="font-medium">{formatDate(screening.date_of_birth)}</p>
+                    </div>
                   </div>
-                </div>
+                )}
                 <div className="flex items-start gap-2">
                   <MapPin className="h-4 w-4 text-slate-400 mt-0.5" />
                   <div>

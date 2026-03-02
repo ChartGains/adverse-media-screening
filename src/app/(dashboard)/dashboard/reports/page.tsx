@@ -144,7 +144,9 @@ export default async function ReportsPage() {
                         <tr key={screening.id} className="border-b border-slate-100 hover:bg-slate-50">
                           <td className="py-3 px-4">
                             <p className="font-medium text-slate-900">{screening.full_name}</p>
-                            <p className="text-sm text-slate-500">DOB: {formatDate(screening.date_of_birth)}</p>
+                            {screening.date_of_birth && screening.date_of_birth !== '1970-01-01' && (
+                              <p className="text-sm text-slate-500">DOB: {formatDate(screening.date_of_birth)}</p>
+                            )}
                           </td>
                           <td className="py-3 px-4 text-sm text-slate-600">
                             {screening.country}

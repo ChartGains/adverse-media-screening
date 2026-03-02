@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import { Header } from '@/components/layout/header'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import Link from 'next/link'
 import {
@@ -15,6 +14,7 @@ import {
 } from 'lucide-react'
 import { formatRelativeTime, getStatusColor } from '@/lib/utils'
 import { ScreeningSubject } from '@/types/database'
+import { ScreeningListItem } from '@/components/screening/ScreeningListItem'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -140,21 +140,13 @@ export default async function DashboardPage() {
               {reviewQueue && reviewQueue.length > 0 ? (
                 <div className="space-y-3">
                   {reviewQueue.map((screening) => (
-                    <Link 
+                    <ScreeningListItem
                       key={screening.id}
+                      screening={screening}
                       href={`/dashboard/review/${screening.id}`}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/50 transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">{screening.full_name}</p>
-                        <p className="text-sm text-slate-500">
-                          {screening.country} • {formatRelativeTime(screening.created_at)}
-                        </p>
-                      </div>
-                      <Badge variant={screening.risk_level as 'critical' | 'high' | 'medium' | 'low' | 'none' || 'secondary'}>
-                        {screening.risk_level || 'Pending'}
-                      </Badge>
-                    </Link>
+                      subtitle={`${screening.country} • ${formatRelativeTime(screening.created_at)}`}
+                      badgeType="risk"
+                    />
                   ))}
                 </div>
               ) : (
@@ -181,21 +173,14 @@ export default async function DashboardPage() {
               {recentScreenings && recentScreenings.length > 0 ? (
                 <div className="space-y-3">
                   {recentScreenings.map((screening) => (
-                    <Link 
+                    <ScreeningListItem
                       key={screening.id}
+                      screening={screening}
                       href={`/dashboard/screening/${screening.id}`}
-                      className="flex items-center justify-between p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors"
-                    >
-                      <div className="flex-1 min-w-0">
-                        <p className="font-medium text-slate-900 truncate">{screening.full_name}</p>
-                        <p className="text-sm text-slate-500">
-                          {screening.country} • {formatRelativeTime(screening.created_at)}
-                        </p>
-                      </div>
-                      <Badge className={getStatusColor(screening.status)}>
-                        {screening.status}
-                      </Badge>
-                    </Link>
+                      subtitle={`${screening.country} • ${formatRelativeTime(screening.created_at)}`}
+                      badgeType="status"
+                      statusColor={getStatusColor(screening.status)}
+                    />
                   ))}
                 </div>
               ) : (

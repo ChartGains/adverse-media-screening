@@ -18,6 +18,7 @@ import {
 } from 'lucide-react'
 import { formatDate, formatDateTime, getStatusColor } from '@/lib/utils'
 import { StartScreeningButton } from '@/components/screening/StartScreeningButton'
+import { DeleteScreeningButton } from '@/components/screening/DeleteScreeningButton'
 
 export default async function ScreeningDetailPage({
   params,
@@ -55,7 +56,7 @@ export default async function ScreeningDetailPage({
     .single() as { data: {
       id: string
       full_name: string
-      date_of_birth: string
+      date_of_birth: string | null
       address: string
       country: string
       aliases: string[] | null
@@ -107,13 +108,20 @@ export default async function ScreeningDetailPage({
       />
       
       <div className="p-6 space-y-6">
-        {/* Back button */}
-        <Link href="/dashboard">
-          <Button variant="ghost" className="gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Back to Dashboard
-          </Button>
-        </Link>
+        {/* Back button & Delete */}
+        <div className="flex items-center justify-between">
+          <Link href="/dashboard">
+            <Button variant="ghost" className="gap-2">
+              <ArrowLeft className="h-4 w-4" />
+              Back to Dashboard
+            </Button>
+          </Link>
+          <DeleteScreeningButton
+            subjectId={screening.id}
+            subjectName={screening.full_name}
+            redirectTo="/dashboard"
+          />
+        </div>
 
         {/* Status Progress */}
         <Card>
@@ -168,7 +176,7 @@ export default async function ScreeningDetailPage({
                 <p className="text-sm text-slate-500">Full Name</p>
                 <p className="font-medium">{screening.full_name}</p>
               </div>
-              {screening.date_of_birth && (
+              {screening.date_of_birth && screening.date_of_birth !== '1970-01-01' && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-slate-400" />
                   <div>

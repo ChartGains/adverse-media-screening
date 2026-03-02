@@ -151,9 +151,11 @@ export default function AdminScreeningsPage() {
                       <td className="py-3 px-4">
                         <div>
                           <p className="font-medium text-slate-900">{screening.full_name}</p>
-                          <p className="text-sm text-slate-500">
-                            DOB: {screening.date_of_birth}
-                          </p>
+                          {screening.date_of_birth && screening.date_of_birth !== '1970-01-01' && (
+                            <p className="text-sm text-slate-500">
+                              DOB: {screening.date_of_birth}
+                            </p>
+                          )}
                         </div>
                       </td>
                       <td className="py-3 px-4 text-sm text-slate-600">

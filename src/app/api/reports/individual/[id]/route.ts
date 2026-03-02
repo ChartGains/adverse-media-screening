@@ -88,10 +88,11 @@ export async function GET(
         <div class="info-label">Full Name</div>
         <div class="info-value">${screening.full_name}</div>
       </div>
+      ${screening.date_of_birth && screening.date_of_birth !== '1970-01-01' ? `
       <div class="info-item">
         <div class="info-label">Date of Birth</div>
         <div class="info-value">${formatDate(screening.date_of_birth)}</div>
-      </div>
+      </div>` : ''}
       <div class="info-item">
         <div class="info-label">Address</div>
         <div class="info-value">${screening.address}</div>
