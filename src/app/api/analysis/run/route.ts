@@ -160,7 +160,7 @@ async function analyzeArticleSnippet(
   article: SearchResultRow,
   subject: { full_name: string; date_of_birth: string | null; country: string | null; aliases: string[] | null; company_affiliation: string | null }
 ): Promise<AnalysisResult> {
-  const prompt = `Analyze this search result for adverse media screening.
+  const prompt = `You are an adverse media screening analyst for a compliance team. Your job is to FLAG anything that COULD be adverse media about the subject. A human reviewer will make the final call — your job is to NOT miss anything.
 
 SUBJECT: ${subject.full_name}
 ${subject.aliases?.length ? `ALIASES: ${subject.aliases.join(', ')}` : ''}
@@ -173,30 +173,29 @@ Source: ${article.domain || 'Unknown'}
 Snippet: ${article.result_snippet || 'No content'}
 Category: ${article.query_category || 'General'}
 
-Determine:
-1. Is this about the SAME person (not just same name)? Consider that many people share the same name.
-2. Does it contain adverse/negative information (fraud, crime, corruption, legal issues, etc)?
-3. Risk level - ONLY if it's adverse media about this specific person
-
-IMPORTANT: A human reviewer will make the final decision. You are providing a recommendation.
+RULES:
+- If the article mentions ANY negative information (crime, fraud, abuse, misconduct, arrest, conviction, lawsuit, scandal, corruption, harassment, violence, theft, terrorism, sanctions, money laundering, etc.) and the name matches or could plausibly match the subject, mark it as "likely_match" with an appropriate risk level.
+- Only mark as "likely_not_match" if the article is CLEARLY about a completely different person (e.g. different profession, different country, different time period that makes it impossible) or contains NO adverse information at all.
+- When in doubt, ALWAYS flag it. It is better to flag a false positive than to miss real adverse media.
+- Even if you're unsure whether it's the same person, if the content is adverse and the name matches, flag it as "uncertain" with the risk level based on the severity of the content.
 
 Respond in JSON format:
 {
   "suggestedMatch": "likely_match" | "likely_not_match" | "uncertain",
   "matchConfidence": 0-100,
   "riskLevel": "none" | "low" | "medium" | "high" | "critical",
-  "riskCategory": "string describing the type of risk (e.g., 'fraud', 'corruption', 'legal issues')",
-  "summary": "one sentence summary of the article",
-  "reasoning": "brief explanation of why this may or may not be about the subject"
+  "riskCategory": "string describing the type of risk (e.g., 'fraud', 'corruption', 'sexual abuse', 'criminal conviction')",
+  "summary": "one sentence summary of what the article says",
+  "reasoning": "brief explanation"
 }`
 
   try {
     const response = await openai.chat.completions.create({
-      model: 'gpt-4o-mini', // Fast and cheap
+      model: 'gpt-4o',
       messages: [{ role: 'user', content: prompt }],
       response_format: { type: 'json_object' },
-      max_tokens: 300,
-      temperature: 0.1,
+      max_tokens: 500,
+      temperature: 0.3,
     })
 
     const content = response.choices[0]?.message?.content || '{}'

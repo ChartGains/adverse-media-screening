@@ -259,11 +259,11 @@ export default async function ScreeningDetailPage({
               )}
 
               {screening.status === 'review' && (() => {
-                // Filter to only show potentially relevant articles (not "none" risk)
-                const relevantArticles = screening.article_analyses?.filter(
+                const flaggedArticles = screening.article_analyses?.filter(
                   a => a.risk_level && a.risk_level !== 'none'
                 ) || []
-                const totalAnalyzed = screening.article_analyses?.length || 0
+                const allArticles = screening.article_analyses || []
+                const totalAnalyzed = allArticles.length
 
                 return (
                   <div className="space-y-4">
@@ -273,7 +273,7 @@ export default async function ScreeningDetailPage({
                         <div>
                           <p className="font-medium text-amber-800">Ready for Review</p>
                           <p className="text-sm text-amber-700">
-                            {relevantArticles.length} potential matches found ({totalAnalyzed} total analyzed)
+                            {flaggedArticles.length} potential matches found ({totalAnalyzed} total analyzed)
                           </p>
                         </div>
                       </div>
@@ -284,19 +284,18 @@ export default async function ScreeningDetailPage({
                       </Link>
                     </div>
 
-                    {/* Article preview - only show relevant articles */}
-                    {relevantArticles.length > 0 ? (
+                    {flaggedArticles.length > 0 ? (
                       <div className="space-y-2">
-                        <h4 className="font-medium text-slate-900">Potential Matches</h4>
-                        {relevantArticles.slice(0, 5).map((article) => (
+                        <h4 className="font-medium text-slate-900">Flagged Articles</h4>
+                        {flaggedArticles.slice(0, 5).map((article) => (
                           <div key={article.id} className="p-3 border border-slate-200 rounded-lg">
                             <div className="flex items-start justify-between">
                               <div className="flex-1">
                                 <p className="font-medium text-slate-900 line-clamp-1">
                                   {article.article_headline || 'Untitled'}
                                 </p>
-                                <p className="text-sm text-slate-500">
-                                  {article.publisher} • {article.publication_date && formatDate(article.publication_date)}
+                                <p className="text-sm text-slate-500 mt-1">
+                                  {article.ai_summary}
                                 </p>
                               </div>
                               <Badge variant={article.risk_level as 'critical' | 'high' | 'medium' | 'low' | 'none' || 'secondary'}>
@@ -305,9 +304,9 @@ export default async function ScreeningDetailPage({
                             </div>
                           </div>
                         ))}
-                        {relevantArticles.length > 5 && (
+                        {flaggedArticles.length > 5 && (
                           <p className="text-sm text-slate-500 text-center">
-                            + {relevantArticles.length - 5} more potential matches
+                            + {flaggedArticles.length - 5} more flagged articles
                           </p>
                         )}
                       </div>
