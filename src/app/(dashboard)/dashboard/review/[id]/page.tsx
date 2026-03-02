@@ -92,9 +92,9 @@ export default function ReviewDetailPage({
   const handleDecision = async (decision: 'cleared' | 'flagged' | 'escalated') => {
     setIsSubmitting(true)
 
-    // Calculate final risk level based on reviewed articles
+    // Calculate final risk level based on reviewed articles (only adverse ones)
     const matchedArticles = data?.screening.article_analyses.filter(
-      a => a.match_status === 'matched'
+      a => a.match_status === 'matched' && a.risk_level && a.risk_level !== 'none'
     ) || []
     
     let finalRiskLevel: RiskLevel = 'none'
@@ -143,13 +143,17 @@ export default function ReviewDetailPage({
   if (!data) return null
 
   const { screening } = data
-  const pendingArticles = screening.article_analyses.filter(
+  // Safety filter: never show non-adverse articles (risk_level 'none') to reviewers
+  const adverseArticles = screening.article_analyses.filter(
+    a => a.risk_level && a.risk_level !== 'none'
+  )
+  const pendingArticles = adverseArticles.filter(
     a => a.match_status === 'pending' || a.match_status === 'uncertain'
   )
-  const matchedArticles = screening.article_analyses.filter(
+  const matchedArticles = adverseArticles.filter(
     a => a.match_status === 'matched'
   )
-  const excludedArticles = screening.article_analyses.filter(
+  const excludedArticles = adverseArticles.filter(
     a => a.match_status === 'excluded'
   )
 
@@ -363,7 +367,7 @@ export default function ReviewDetailPage({
             )}
 
             {/* No articles */}
-            {screening.article_analyses.length === 0 && (
+            {adverseArticles.length === 0 && (
               <Card>
                 <CardContent className="p-12 text-center">
                   <CheckCircle2 className="h-16 w-16 mx-auto mb-4 text-emerald-500" />

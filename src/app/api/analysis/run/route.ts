@@ -80,7 +80,11 @@ export async function POST(request: NextRequest) {
     // Store results
     const adminClient = createAdminClient()
     
-    const analysesToInsert = analyses.map(analysis => {
+    // Only store articles that are ACTUALLY adverse media (risk_level !== 'none')
+    // Non-adverse articles should never be shown to reviewers
+    const adverseAnalyses = analyses.filter(a => a.riskLevel !== 'none')
+
+    const analysesToInsert = adverseAnalyses.map(analysis => {
       const searchResult = searchResults.find(sr => sr.result_url === analysis.url)
       return {
         search_result_id: searchResult?.id,
@@ -103,8 +107,10 @@ export async function POST(request: NextRequest) {
         .insert(analysesToInsert as never)
     }
 
-    // Calculate overall risk
-    const riskLevels = analyses.map(a => a.riskLevel)
+    console.log(`Stored ${adverseAnalyses.length} adverse articles out of ${analyses.length} total analyzed`)
+
+    // Calculate overall risk (only from adverse articles)
+    const riskLevels = adverseAnalyses.map(a => a.riskLevel)
     const overallRisk = calculateOverallRisk(riskLevels)
 
     // Update subject
